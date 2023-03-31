@@ -1,10 +1,12 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 tf.data.experimental.enable_debug_mode()
 
 # Definir las rutas de las imágenes
-train_dir = r'C:\Users\Admin\Documents\Images\Dataset\Entrenamiento'
-validation_dir = r'C:\Users\Admin\Documents\Images\Dataset\Validacion'
+train_dir = r'/home/oriel/python/testIA/Images/Dataset/Entrenamiento'
+validation_dir = r'/home/oriel/python/testIA/Images/Dataset/Validacion'
 
 # Definir el generador de imágenes para el entrenamiento y validación
 train_datagen = ImageDataGenerator(rescale=1./255)

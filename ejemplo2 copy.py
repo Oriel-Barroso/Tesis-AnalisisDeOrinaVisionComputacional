@@ -1,5 +1,9 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import scipy
+
 
 model = tf.keras.models.Sequential([
     tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)),
@@ -26,13 +30,13 @@ train_datagen = ImageDataGenerator(rescale=1./255,
 test_datagen = ImageDataGenerator(rescale=1./255)
 
 train_generator = train_datagen.flow_from_directory(
-        r'C:\Users\Admin\Documents\Images\Dataset\Entrenamiento',
+        r'/home/oriel/python/testIA/Images/Dataset/Entrenamiento',
         target_size=(150, 150),
         batch_size=20,
         class_mode='binary')
 
 validation_generator = test_datagen.flow_from_directory(
-        r'C:\Users\Admin\Documents\Images\Dataset\Validacion',
+        r'/home/oriel/python/testIA/Images/Dataset/Validacion',
         target_size=(150, 150),
         batch_size=20,
         class_mode='binary')
@@ -51,3 +55,11 @@ history = model.fit(
       validation_data=validation_generator,
       validation_steps=50,
       verbose=2)
+
+
+model_json = model.to_json()
+with open("model.json", "w") as json_f:
+    json_f.write(model_json)
+
+model.save_weights("model.h5")
+print("Modelo guardado!")
