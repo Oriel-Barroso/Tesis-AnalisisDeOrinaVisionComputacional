@@ -18,7 +18,7 @@ model = tf.keras.models.Sequential([
 
 model.compile(loss='binary_crossentropy',
               optimizer=tf.keras.optimizers.RMSprop(learning_rate=0.001),
-              metrics=['acc',]) #metrics.Mean('val_loss')])
+              metrics=['acc'])
 
 train_datagen = ImageDataGenerator(rescale=1./255,
                                    rotation_range=40,
@@ -41,31 +41,20 @@ validation_generator = test_datagen.flow_from_directory(
         target_size=(150, 150),
         batch_size=20,
         class_mode='binary')
-
-train_dataset = tf.data.Dataset.from_generator(
-        lambda: train_generator,
+validation_dataset = tf.data.Dataset.from_generator(
+        lambda: validation_generator,
         output_types=(tf.float32, tf.float32),
         output_shapes=([None, 150, 150, 3], [None]))
 
-train_dataset1 = train_dataset.repeat()
-
+validation_dataset1 = validation_dataset.repeat()
 callb=[tf.keras.callbacks.ModelCheckpoint(filepath= 'modelo', verbose=1, save_freq="epoch", mode='auto',monitor='val_loss', save_best_only=True)]
 
 history = model.fit(
-      train_dataset1,
-      steps_per_epoch=100,
+      train_generator,
+      steps_per_epoch=len(train_generator), # número de lotes en un ciclo de entrenamiento
       epochs=100,
-      validation_data=validation_generator,
+      validation_data=validation_dataset1,
       validation_steps=50,
       verbose=2,
       callbacks=callb
       )
-
-
-
-# model_json = model.to_json()
-# with open("model.json", "w") as json_f:
-#     json_f.write(model_json)
-
-# model.save_weights("model.h5")
-# print("Modelo guardado!")
