@@ -48,14 +48,19 @@ train_dataset = tf.data.Dataset.from_generator(
         output_shapes=([None, 150, 150, 3], [None]))
 
 train_dataset1 = train_dataset.repeat()
+validation_dataset = tf.data.Dataset.from_generator(
+        lambda: validation_generator,
+        output_types=(tf.float32, tf.float32),
+        output_shapes=([None, 150, 150, 3], [None]))
 
+validation_dataset1 = validation_dataset.repeat()
 callb=[tf.keras.callbacks.ModelCheckpoint(filepath= 'modelo', verbose=1, save_freq="epoch", mode='auto',monitor='val_loss', save_best_only=True)]
 
 history = model.fit(
       train_dataset1,
       steps_per_epoch=100,
       epochs=100,
-      validation_data=validation_generator,
+      validation_data=validation_dataset1,
       validation_steps=50,
       verbose=2,
       callbacks=callb

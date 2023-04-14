@@ -13,6 +13,7 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.MaxPooling2D(2, 2),
     tf.keras.layers.Flatten(),
     tf.keras.layers.Dense(512, activation='relu'),
+    tf.keras.layers.Dropout(0.5),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
 
@@ -47,14 +48,14 @@ validation_dataset = tf.data.Dataset.from_generator(
         output_shapes=([None, 150, 150, 3], [None]))
 
 validation_dataset1 = validation_dataset.repeat()
-callb=[tf.keras.callbacks.ModelCheckpoint(filepath= 'modelo', verbose=1, save_freq="epoch", mode='auto',monitor='val_loss', save_best_only=True)]
+callb=[tf.keras.callbacks.ModelCheckpoint(filepath= 'modelo', verbose=1, save_freq="epoch", mode='auto', save_best_only=True)]
 
 history = model.fit(
       train_generator,
       steps_per_epoch=len(train_generator), # número de lotes en un ciclo de entrenamiento
       epochs=100,
       validation_data=validation_dataset1,
-      validation_steps=50,
+      validation_steps=len(validation_generator),
       verbose=2,
       callbacks=callb
       )
