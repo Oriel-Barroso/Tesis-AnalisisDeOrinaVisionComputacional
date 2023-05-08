@@ -1,0 +1,17 @@
+Flujo de pasos:
+--------------
+
+- Mostrar la ia entrenada sin el crop
+- Mostrar la ia entrenada con el crop
+- Mostrar las imagenes cropeadas
+- Mostrar la comparacion de colores 
+
+-----------------------------------------
+Dificultades:
+------------
+
+- Las imagenes no pueden estar en otro angulo que no sea a 90 o a 180 grados 
+- Las imagenes deben ser captadas con un brillo determinado (lo suficientemente alto para estar acorde al mapa de colores)
+  . No sabria cual es el brillo exacto al cual debe sacarse la imagen (podria determinarse a traves de la deteccion
+   de brillo)
+- No consigo el mapa de colores acorde a mi tira reactiva (error externo)
