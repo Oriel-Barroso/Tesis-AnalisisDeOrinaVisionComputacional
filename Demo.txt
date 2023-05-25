@@ -1,3 +1,23 @@
+<<<<<<< HEAD
 version https://git-lfs.github.com/spec/v1
-oid sha256:2cf60191d3986c059aefeb00f1be797b5036b2e127aaffde33a15e691097b5eb
-size 868
+oid sha256:032992324688c8e1a6552f7752e3b19a1ad4593e98a3797b7fe0b774aabb5a5b
+size 669
+=======
+Flujo de pasos:
+--------------
+
+- Mostrar la ia entrenada sin el crop
+- Mostrar la ia entrenada con el crop
+- Mostrar las imagenes cropeadas
+- Mostrar la comparacion de colores 
+
+-----------------------------------------
+Dificultades:
+------------
+
+- Las imagenes no pueden estar en otro angulo que no sea a 90 o a 180 grados 
+- Las imagenes deben ser captadas con un brillo determinado (lo suficientemente alto para estar acorde al mapa de colores)
+  . No sabria cual es el brillo exacto al cual debe sacarse la imagen (podria determinarse a traves de la deteccion
+   de brillo)
+- No consigo el mapa de colores acorde a mi tira reactiva (error externo)
+>>>>>>> dd70e7b7faf0d5343b65a4259fa25ca263dd82da
