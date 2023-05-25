@@ -1,3 +1,9 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:0c76785f91b18c1b26f0656d5f872911d2b4606d57ddcca8d41aa2a55551e229
-size 179
+lista = ['1','2','3']
+dic = {'a1':1, 'a': 2, 'b2': 3, 'ggg5': 4}
+dic2 = {}
+for k,v in dic.items():
+    print(k[-1])
+    if k[-1] in lista:
+        dic2[k] = v
+
+print(dic2)

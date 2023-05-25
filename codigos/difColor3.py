@@ -1,3 +1,17 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:ac0f1e537b95280c7aefb9b48e41ae31b16a96d74c0fb92c270f3bcc1e48a31c
-size 389
+import cv2
+import numpy as np
+
+
+def ColorDistance(rgb1, rgb2):
+    diff = cv2.absdiff(rgb1, rgb2)
+    gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+    return np.mean(gray)
+
+
+i1 = cv2.imread('./crop/0.jpg')
+i2 = cv2.imread('./colores/0/hb1.jpeg')
+
+# Redimensionar las imágenes para que tengan el mismo tamaño
+i1 = cv2.resize(i1, (i2.shape[1], i2.shape[0]))
+
+print(ColorDistance(i1, i2))

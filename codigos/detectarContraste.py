@@ -1,3 +1,22 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:cb0061c3bbdabe8ed4843f487a34a5a93a2940ff376a6e48c2303b203c387f05
-size 504
+import cv2
+import numpy as np
+
+# load image as YUV (or YCbCR) and select Y (intensity)
+# or convert to grayscale, which should be the same.
+# Alternately, use L (luminance) from LAB.
+img = cv2.imread("imagenes/imagen_52.jpg")
+Y = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)[:,:,0]
+
+# compute min and max of Y
+min = np.min(Y)
+max = np.max(Y)
+
+# compute contrast
+contrast = (max-min)/(max+min)
+print(min,max,contrast)
+
+img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+contrastA = img_grey.std()
+
+print(contrastA)

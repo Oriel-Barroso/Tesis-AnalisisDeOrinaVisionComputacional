@@ -1,3 +1,19 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:8b14c3b4454ebedb380fde493270f885a2b0678fa0d54d85ffd7ec25bc37075a
-size 494
+from PIL import Image, ImageEnhance, ImageStat
+
+img = Image.open("pruebas/img3.jpeg").convert("RGB")
+
+img_enhancer = ImageEnhance.Contrast(img)
+
+
+estadisticas = ImageStat.Stat(img)
+brillo_promedio = estadisticas.mean[0]
+factor = 1
+# Obtener el brillo promedio de la imagen
+brightness = 0
+while brightness < 180:
+    enhanced_output = img_enhancer.enhance(factor)
+    est = ImageStat.Stat(enhanced_output)
+    brightness = est.mean[0]
+    factor+=0.2
+
+enhanced_output.save("original-image.jpeg")
