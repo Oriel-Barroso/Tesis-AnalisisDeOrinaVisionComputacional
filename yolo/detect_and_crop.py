@@ -168,11 +168,6 @@ class DetectCrop():
                 # Print time (inference + NMS)
                 print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
-                # Save results (image with detections)
-                if self.save_img:
-                    if dataset.mode == 'image':
-                        cv2.imwrite(save_path, im0)
-                        print(f" The image with the result is saved in: {save_path}")
                     
 
         if self.save_txt or self.save_img:

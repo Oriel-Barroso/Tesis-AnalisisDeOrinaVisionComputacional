@@ -1,12 +1,9 @@
 import time 
 import streamlit as st
-import requests
 import os
-from PIL import Image
 import base64
 from pathlib import Path
 import sys
-# Obtener la ruta absoluta del directorio actual
 current_dir = os.path.dirname(os.path.abspath(__file__))
 imgEjemplo = os.path.join(current_dir, 'imgEjemplo')
 backend = os.path.join(current_dir, '..', 'backend')
@@ -49,7 +46,7 @@ class Frontend():
 
 
     def descargarPDF(self, nombrePDF):
-        archivo_pdf = '../backend/'+nombrePDF
+        archivo_pdf = nombrePDF
         if not os.path.isfile(archivo_pdf):
             raise NameError
         else:
@@ -59,7 +56,7 @@ class Frontend():
                 label="Descargar archivo",
                 data=contents,
                 file_name='resultados.pdf',
-                mime='text/plain'
+                mime='text/plain',
             )
 
     def considerations(self):
