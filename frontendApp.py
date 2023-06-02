@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 current_dir = os.path.dirname(os.path.abspath(__file__))
 imgEjemplo = os.path.join(current_dir, 'imgEjemplo')
-backend = os.path.join(current_dir, '..', 'backend')
+backend = os.path.join(current_dir, 'backend')
 sys.path.append(backend)
 import app
 
