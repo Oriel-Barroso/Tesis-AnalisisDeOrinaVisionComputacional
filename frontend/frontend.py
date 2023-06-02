@@ -73,7 +73,7 @@ class Frontend():
                   ' de la base en donde se esten realizando los estudios, o algun otro elemento que interfiera en el analisis.']
         for texto in textos:
                 st.markdown(f"- {texto}")
-        ruta = './imgEjemplo/imgEjemplo.jpeg'
+        ruta = 'imgEjemplo/imgEjemplo.jpeg'
         st.markdown("<p style='text-align: center; color: grey;'>"+self.img_to_html(ruta)+"</p>", unsafe_allow_html=True)
         st.markdown("<h6 style='text-align: center;'> Imagen ejemplo </h6>", unsafe_allow_html=True)
 
