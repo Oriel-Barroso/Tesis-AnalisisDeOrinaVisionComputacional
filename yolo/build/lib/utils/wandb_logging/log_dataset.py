@@ -1,3 +1,24 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:e4bc9d2ccef016e2caaf35bb513814a2f2be3ae5870b0448a16a0a30a1db49a8
-size 815
+import argparse
+
+import yaml
+
+from wandb_utils import WandbLogger
+
+WANDB_ARTIFACT_PREFIX = 'wandb-artifact://'
+
+
+def create_dataset_artifact(opt):
+    with open(opt.data) as f:
+        data = yaml.load(f, Loader=yaml.SafeLoader)  # data dict
+    logger = WandbLogger(opt, '', None, data, job_type='Dataset Creation')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data', type=str, default='data/coco.yaml', help='data.yaml path')
+    parser.add_argument('--single-cls', action='store_true', help='train as single-class dataset')
+    parser.add_argument('--project', type=str, default='YOLOR', help='name of W&B Project')
+    opt = parser.parse_args()
+    opt.resume = False  # Explicitly disallow resume check for dataset upload job
+
+    create_dataset_artifact(opt)
