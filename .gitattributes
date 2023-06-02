@@ -1,5 +1,0 @@
-yolo/traced_model.pt filter=lfs diff=lfs merge=lfs -text
-/yolo/LICENSE filter=lfs diff=lfs merge=lfs -text
-*.md filter=lfs diff=lfs merge=lfs -text
-*.pt filter=lfs diff=lfs merge=lfs -text
-/yolo/utils/google_app_engine/Dockerfile filter=lfs diff=lfs merge=lfs -text
