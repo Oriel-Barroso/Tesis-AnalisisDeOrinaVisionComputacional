@@ -42,7 +42,8 @@ class Frontend():
         if self.response['status'] == 'ok':
             self.resultados = self.response['pdf-name']
         elif self.response['status'] == 'error':
-            self.resultados =  f"Las imagenes: {self.response['images']} no se han procesado correctamente"
+            text = str(self.response['images'])
+            self.resultados =  f"Las imagenes: {text[1:text.index(']')]} no se han procesado correctamente"
 
 
     def descargarPDF(self, nombrePDF):
