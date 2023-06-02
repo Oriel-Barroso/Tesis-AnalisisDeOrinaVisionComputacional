@@ -1,6 +1,5 @@
 import cv2
 import os
-import numpy as np
 import colour
 
 
@@ -11,6 +10,7 @@ class DiferenciaColores():
         self.menorDiferencia = {}
         self.resultadoFinal = []
         self.imagePath = imagePath
+        self.current_dir = os.path.dirname(os.path.abspath(__file__))
         self.resultados = {
             's1': 'La densidad relativa tiene un valor de: 1.000',
             's2': 'La densidad relativa tiene un valor de: 1.005',
@@ -79,12 +79,13 @@ class DiferenciaColores():
         dic = {}
         for ruta in rutas:
             dic[ruta] = os.listdir(ruta)
+        print(dic)
         return dic
 
     def getRutaColores(self, carpetas):
         lista = []
         for i in range(0, len(carpetas)):
-            lista.append('./colores/'+carpetas[i])
+            lista.append(self.current_dir+'/colores/'+carpetas[i])
         return lista
 
     def leerColores(self, ruta):
@@ -130,8 +131,8 @@ class DiferenciaColores():
                     self.resultadoFinal.append(v)
 
     def main(self):
-        rutaImgCrop = 'crop/'+self.imagePath
-        carpetasColores = os.listdir('colores/')
+        rutaImgCrop = self.current_dir+'/crop/'+self.imagePath
+        carpetasColores = os.listdir(self.current_dir+'/colores/')
         rutaColores = self.getRutaColores(carpetasColores)
         dictImgColores = self.archivosColores(rutaColores)
         for ruta in dictImgColores.keys():
@@ -141,9 +142,9 @@ class DiferenciaColores():
         val = 0
         for k, valMeans in dictImgsCrop.items():
             for k2, valDict in self.imgColores.items():
-                if k.startswith(str(val)) and k2.endswith(str(val)):
+                if k.startswith(str(val)) and k2[-1].startswith(str(val)):
                     dicDiferencias.setdefault(str(val), {})[k2[:k2.index(
-                        '.')]+'/'+k] = self.calculate_delta_eitp(valMeans,
+                        '/')]+'/'+k] = self.calculate_delta_eitp(valMeans,
                                                                  valDict)
             val += 1
         print(dicDiferencias)
@@ -158,6 +159,6 @@ class DiferenciaColores():
         return self.resultadoFinal
 
 
-if __name__ == '__main__':
-    f = DiferenciaColores('imagenPatologicaA (3)')
-    f.main()
+# if __name__ == '__main__':
+#     f = DiferenciaColores('s23')
+#     f.main()
