@@ -16,16 +16,12 @@ sys.path.append(carpeta_raiz_dir)
 import detect_and_crop
 import backend.diferenciaColor as diferenciaColor
 from pdfConverter import PdfConverter
-from flask import Flask, request, jsonify
 import datetime
 
-app = Flask(__name__)
 
-@app.route("/im_size", methods=["POST"])
-def process_image():
+def process_image(data):
     hora_actual = datetime.datetime.now()
-    data = request.files['image']
-    valuesDict = ast.literal_eval(data.stream.read().decode())
+    valuesDict = data['image']
     nombreCarpeta = 'imagenes'+ str(hora_actual.year) + str(hora_actual.month) \
             + str(hora_actual.day) + str(hora_actual.hour) + \
             str(hora_actual.minute) + str(hora_actual.second) + str(hora_actual.microsecond)
@@ -46,9 +42,9 @@ def process_image():
     if resultsNewDifference == []:
         pdf = PdfConverter(resultDifference)
         nombrePDF = pdf.createPDF()
-        return jsonify({'pdf-name': nombrePDF, 'status': 'ok'})
+        return {'pdf-name': nombrePDF, 'status': 'ok'}
     print(resultsNewDifference)
-    return jsonify({'status': 'error', 'images': str(resultsNewDifference)})
+    return {'status': 'error', 'images': str(resultsNewDifference)}
     
 
 def checkDifferenceColors(path):

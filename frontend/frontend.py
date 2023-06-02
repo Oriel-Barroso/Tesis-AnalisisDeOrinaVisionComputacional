@@ -5,10 +5,14 @@ import os
 from PIL import Image
 import base64
 from pathlib import Path
-
+import sys
 # Obtener la ruta absoluta del directorio actual
 current_dir = os.path.dirname(os.path.abspath(__file__))
 imgEjemplo = os.path.join(current_dir, 'imgEjemplo')
+backend = os.path.join(current_dir, '..', 'backend')
+sys.path.append(backend)
+import app
+
 
 class Frontend():
     def __init__(self):
@@ -30,13 +34,11 @@ class Frontend():
 
 
     def analizar_imagen(self, filesData):
-        url = 'http://127.0.0.1:5000/im_size'
         image_data = {}
         for data in filesData:
             image_data[data.name] = data.getvalue()
-        data = {'image': str(image_data).encode()}
-        response = requests.post(url, files=data)
-        self.response = response.json()
+        data = {'image': image_data}
+        self.response = app.process_image(data)
         
     
     def checkResponse(self):
