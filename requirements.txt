@@ -1,7 +1,7 @@
 colormath>=3.0.0
 matplotlib>=3.2.2
 numpy>=1.18.5
-opencv-python>=4.1.1
+opencv-python-headless==4.5.5.64
 Pillow>=7.1.2
 PyYAML>=5.3.1
 requests>=2.23.0
@@ -17,3 +17,4 @@ colour-science>=0.4.2
 Flask>=2.3.2
 streamlit>=1.22.0
 reportlab>=4.0.0
+mmcv-full --no-binary mmcv-full
