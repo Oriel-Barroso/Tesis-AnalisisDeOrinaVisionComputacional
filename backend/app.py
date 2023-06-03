@@ -1,14 +1,12 @@
+import shutil
 import sys
 import os
 import ast
-# Obtener la ruta absoluta del directorio actual
-current_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Obtener la ruta absoluta de la carpeta CarpetaB
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
 yolo_dir = os.path.join(current_dir, '..', 'yolo')
 carpeta_raiz_dir = os.path.dirname(current_dir)
-
-# Añadir la ruta de yolo al path de búsqueda de módulos
 sys.path.append(yolo_dir)
 sys.path.append(carpeta_raiz_dir)
 
@@ -42,7 +40,12 @@ def process_image(data):
     if resultsNewDifference == []:
         pdf = PdfConverter(resultDifference)
         nombrePDF = pdf.createPDF()
+        deleteDirs(source)
+        for nombreImagen in valuesDict.keys():
+            print(nombreImagen)
+            deleteDirs(current_dir+'/crop/'+nombreImagen[:nombreImagen.index('.')])
         return {'pdf-name': nombrePDF, 'status': 'ok'}
+    
     print(resultsNewDifference)
     return {'status': 'error', 'images': str(resultsNewDifference)}
     
@@ -64,5 +67,7 @@ def checkResults(results):
             resultsNew[k] = v
     return resultsNew
 
-if __name__ == "__main__":
-    app.run(debug=False)
+def deleteDirs(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+    

@@ -136,7 +136,6 @@ class DetectCrop():
                 p, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
 
                 p = Path(p)  # to Path
-                save_path = str(save_dir / p.name)
                 if not os.path.exists(self.image+p.name[:p.name.index('.')]):
                     os.makedirs(self.image+p.name[:p.name.index('.')])
                 if len(det):
@@ -170,8 +169,6 @@ class DetectCrop():
 
                     
 
-        if self.save_txt or self.save_img:
-            s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
             #print(f"Results saved to {save_dir}{s}")
 
         print(f'Done. ({time.time() - t0:.3f}s)')

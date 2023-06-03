@@ -1,7 +1,5 @@
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-import datetime
-
 
 
 class PdfConverter():
@@ -9,11 +7,7 @@ class PdfConverter():
         self.resultados = resultados
 
     def createPDF(self):
-        hora_actual = datetime.datetime.now()
-        nombrePDF = 'resultados' + str(hora_actual.year) + str(hora_actual.month) \
-            + str(hora_actual.day) + str(hora_actual.hour) + \
-            str(hora_actual.minute) + str(hora_actual.second) \
-            + str(hora_actual.microsecond) + '.pdf'
+        nombrePDF = 'resultados.pdf'
         pdf = canvas.Canvas(nombrePDF, pagesize=letter)
 
         # Establecer título en la primera página

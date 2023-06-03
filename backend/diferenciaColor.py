@@ -147,15 +147,10 @@ class DiferenciaColores():
                         '/')]+'/'+k] = self.calculate_delta_eitp(valMeans,
                                                                  valDict)
             val += 1
-        print(dicDiferencias)
-        print('\n\n\n')
         for v in dicDiferencias.values():
             self.obtenerMenorDiferencia(v)
-        print(self.menorDiferencia)
         for v in self.menorDiferencia.values():
             self.obtenerResultado(v)
-        print(self.resultadoFinal)
-        print(len(self.resultadoFinal))
         return self.resultadoFinal
 
 
