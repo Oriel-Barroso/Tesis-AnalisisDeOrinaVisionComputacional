@@ -149,8 +149,3 @@ class DiferenciaColores():
             self.obtenerResultado(v)
         print(self.resultadoFinal)
         return self.resultadoFinal
-
-
-if __name__ == '__main__':
-    f = DiferenciaColores('imagen_4')
-    f.main()

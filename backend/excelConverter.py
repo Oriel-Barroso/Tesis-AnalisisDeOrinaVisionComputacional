@@ -10,4 +10,3 @@ class CreateExcel():
         df_transpuesto = df.transpose()
         archivo_excel = 'resultadosExcel.xlsx'
         df_transpuesto.style.set_properties(**{'text-align': 'center'}).to_excel(archivo_excel)
-        return archivo_excel
