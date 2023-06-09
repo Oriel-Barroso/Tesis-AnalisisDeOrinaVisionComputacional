@@ -25,9 +25,6 @@ class DiferenciaColores():
             'x4': 'El pH tiene un valor de: 8',
             'x5': 'El pH tiene un valor de: 9',
             'l1': 'Los leucocitos tienen un valor: negativo',
-            'l1': 'Los leucocitos tienen un valor de: negativo',
-            'l1': 'Los leucocitos tienen un valor de: negativo',
-            'l2': 'Los leucocitos tienen un valor de: 1 + ~ 10-25',
             'l2': 'Los leucocitos tienen un valor de: 1 + ~ 10-25',
             'l3': 'Los leucocitos tienen un valor de: 2 + ~ 75',
             'l4': 'Los leucocitos tienen un valor de: 3 + 500 Leu/μL',
@@ -79,7 +76,6 @@ class DiferenciaColores():
         dic = {}
         for ruta in rutas:
             dic[ruta] = os.listdir(ruta)
-        print(dic)
         return dic
 
     def getRutaColores(self, carpetas):
@@ -127,7 +123,7 @@ class DiferenciaColores():
                 kc = kb[0]
                 kd = kb[-1]
                 ke = kc+kd
-                if k3 == ke :
+                if k3 == ke:
                     self.resultadoFinal.append(v)
 
     def main(self):
@@ -151,9 +147,10 @@ class DiferenciaColores():
             self.obtenerMenorDiferencia(v)
         for v in self.menorDiferencia.values():
             self.obtenerResultado(v)
+        print(self.resultadoFinal)
         return self.resultadoFinal
 
 
-# if __name__ == '__main__':
-#     f = DiferenciaColores('s23')
-#     f.main()
+if __name__ == '__main__':
+    f = DiferenciaColores('imagen_4')
+    f.main()

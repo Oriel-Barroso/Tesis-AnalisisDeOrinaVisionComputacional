@@ -1,8 +1,10 @@
 import shutil
 import sys
 import os
-import ast
-
+import diferenciaColor as diferenciaColor
+from pdfConverter import PdfConverter
+import datetime
+from excelConverter import CreateExcel
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 yolo_dir = os.path.join(current_dir, '..', 'yolo')
@@ -10,11 +12,7 @@ carpeta_raiz_dir = os.path.dirname(current_dir)
 sys.path.append(yolo_dir)
 sys.path.append(carpeta_raiz_dir)
 
-
 import detect_and_crop
-import backend.diferenciaColor as diferenciaColor
-from pdfConverter import PdfConverter
-import datetime
 
 
 def process_image(data):
@@ -30,8 +28,11 @@ def process_image(data):
     detc = detect_and_crop.DetectCrop(weights=yolo_dir+'/best.pt', source=source, image=current_dir+'/crop/')
     detc.detect()
     resultDifference = {}
+    resultExcel = {}
     for nombreImagen in valuesDict.keys():
-        resultDifference[nombreImagen] = checkDifferenceColors(nombreImagen[:nombreImagen.index('.')])
+        valor = checkDifferenceColors(nombreImagen[:nombreImagen.index('.')])
+        resultDifference[nombreImagen] = valor
+        resultExcel[nombreImagen] = createDict(valor)
     resultsNew = checkResults(resultDifference)
     resultsNewDifference = []
     for nombreImagen in valuesDict.keys():
@@ -39,26 +40,29 @@ def process_image(data):
             resultsNewDifference.append(nombreImagen)
     if resultsNewDifference == []:
         pdf = PdfConverter(resultDifference)
-        nombrePDF = pdf.createPDF()
+        pdf.createPDF()
+        excel = CreateExcel(resultExcel)
+        excel.createExl()
         deleteDirs(source)
         for nombreImagen in valuesDict.keys():
             print(nombreImagen)
             deleteDirs(current_dir+'/crop/'+nombreImagen[:nombreImagen.index('.')])
-        return {'pdf-name': nombrePDF, 'status': 'ok'}
-    
+        return {'status': 'ok'}
     print(resultsNewDifference)
     return {'status': 'error', 'images': str(resultsNewDifference)}
-    
+
 
 def checkDifferenceColors(path):
     dif = diferenciaColor.DiferenciaColores(path)
     val = dif.main()
     return val
 
+
 def createDirExist(image):
     if not os.path.exists(current_dir+"/imgEnt/"+image):
         os.makedirs(current_dir+"/imgEnt/"+image)
     return current_dir+"/imgEnt/"+image+'/'
+
 
 def checkResults(results):
     resultsNew = {}
@@ -67,7 +71,19 @@ def checkResults(results):
             resultsNew[k] = v
     return resultsNew
 
+
 def deleteDirs(path):
     if os.path.exists(path):
         shutil.rmtree(path)
-    
+
+
+def createDict(lista):
+    dic = {'Sangre': None, 'Bilirruina': None, 'Urobilinogeno': None, 
+            'Cuerpos cetonicos': None, 'Glucosa': None, 'Proteina': None, 
+            'Nitrito': None, 'Leucocitos': None, 'pH': None, 
+            'Densidad relativa': None}
+    i = 0
+    for k in dic.keys():
+        dic[k] = lista[i][lista[i].index(': ')+1:].replace(" ", "") # Toma el valor de la lista, busca el valor despues de los 2 puntos y borra el espacio
+        i += 1
+    return dic
