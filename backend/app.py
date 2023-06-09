@@ -29,27 +29,26 @@ def process_image(data):
     detc.detect()
     resultDifference = {}
     resultExcel = {}
+    resultError = []
+    resultOK = []
     for nombreImagen in valuesDict.keys():
         valor = checkDifferenceColors(nombreImagen[:nombreImagen.index('.')])
-        resultDifference[nombreImagen] = valor
-        resultExcel[nombreImagen] = createDict(valor)
-    resultsNew = checkResults(resultDifference)
-    resultsNewDifference = []
-    for nombreImagen in valuesDict.keys():
-        if nombreImagen not in resultsNew.keys():
-            resultsNewDifference.append(nombreImagen)
-    if resultsNewDifference == []:
+        if len(valor) == 10:
+            resultDifference[nombreImagen] = valor
+            resultExcel[nombreImagen] = createDict(valor)
+            resultOK.append(nombreImagen)
+        else:
+            resultError.append(nombreImagen)
+    if len(resultDifference) != 0 and len(resultExcel) != 0:
         pdf = PdfConverter(resultDifference)
         pdf.createPDF()
         excel = CreateExcel(resultExcel)
         excel.createExl()
-        deleteDirs(source)
-        for nombreImagen in valuesDict.keys():
-            print(nombreImagen)
-            deleteDirs(current_dir+'/crop/'+nombreImagen[:nombreImagen.index('.')])
-        return {'status': 'ok'}
-    print(resultsNewDifference)
-    return {'status': 'error', 'images': str(resultsNewDifference)}
+    deleteDirs(source)
+    for nombreImagen in valuesDict.keys():
+        print(nombreImagen)
+        deleteDirs(current_dir+'/crop/'+nombreImagen[:nombreImagen.index('.')])
+    return {'imagesOK': resultOK, 'imagesError': resultError}
 
 
 def checkDifferenceColors(path):
@@ -64,26 +63,21 @@ def createDirExist(image):
     return current_dir+"/imgEnt/"+image+'/'
 
 
-def checkResults(results):
-    resultsNew = {}
-    for k,v in results.items():
-        if len(v) == 10:
-            resultsNew[k] = v
-    return resultsNew
-
-
 def deleteDirs(path):
     if os.path.exists(path):
         shutil.rmtree(path)
 
 
 def createDict(lista):
-    dic = {'Sangre': None, 'Bilirruina': None, 'Urobilinogeno': None, 
-            'Cuerpos cetonicos': None, 'Glucosa': None, 'Proteina': None, 
-            'Nitrito': None, 'Leucocitos': None, 'pH': None, 
-            'Densidad relativa': None}
-    i = 0
-    for k in dic.keys():
-        dic[k] = lista[i][lista[i].index(': ')+1:].replace(" ", "") # Toma el valor de la lista, busca el valor despues de los 2 puntos y borra el espacio
-        i += 1
-    return dic
+    try:
+        dic = {'Sangre': None, 'Bilirruina': None, 'Urobilinogeno': None, 
+                'Cuerpos cetonicos': None, 'Glucosa': None, 'Proteina': None, 
+                'Nitrito': None, 'Leucocitos': None, 'pH': None, 
+                'Densidad relativa': None}
+        i = 0
+        for k in dic.keys():
+            dic[k] = lista[i][lista[i].index(': ')+1:].replace(" ", "") # Toma el valor de la lista, busca el valor despues de los 2 puntos y borra el espacio
+            i += 1
+        return dic
+    except Exception:
+        raise IndexError

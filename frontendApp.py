@@ -8,6 +8,7 @@ import json
 import pickle
 import uuid
 import re
+import datetime
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 imgEjemplo = os.path.join(current_dir, 'imgEjemplo')
@@ -19,7 +20,8 @@ import app
 
 class Frontend():
     def __init__(self):
-        self.resultados = None
+        self.resultadosOK = ""
+        self.resultadosERROR = ""
         self.response = None
 
     def download_button(self, object_to_download, download_filename,
@@ -117,12 +119,12 @@ class Frontend():
         self.response = app.process_image(data)
 
     def checkResponse(self):
-        if self.response['status'] == 'ok':
-            return 0
-        elif self.response['status'] == 'error':
-            text = str(self.response['images'])
-            self.resultados = f"Las imagenes: {text[1:text.index(']')]} "
-            "no se han procesado correctamente"
+        if self.response['imagesOK'] != []:
+            textOK = str(self.response['imagesOK'])
+            self.resultadosOK = f"Las imagenes: {textOK[1:textOK.index(']')]} se han procesado correctamente"
+        if self.response['imagesError'] != []:
+            textERROR = str(self.response['imagesError'])
+            self.resultadosERROR = f"Las imagenes: {textERROR[1:textERROR.index(']')]} no se han procesado correctamente"
 
     def descargar(self):
         archivo_pdf = 'resultados.pdf'
@@ -179,7 +181,6 @@ class Frontend():
         unsafe_allow_html=True
         )
 
-
     def main(self):
         st.set_page_config(page_title="Testrine - Análisis de orina")
         self.add_bg_from_local('imgBack.png')
@@ -190,17 +191,14 @@ class Frontend():
         if st.button("Analizar Imagen"):
             with st.spinner():
                 if uploaded_file != []:
-                    inicio = time.time()
                     self.analizar_imagen(uploaded_file)
-                    fin = time.time()
                     self.checkResponse()
-                    try:
+                    if self.resultadosERROR != "":
+                        st.error(self.resultadosERROR)
+                    if self.resultadosOK != "":
                         st.success(
-                            'Analisis realizado con exito. Puedes ver los resultados en el pdf.')
+                        f'{self.resultadosOK}. Puedes ver los resultados en el pdf o en excel.')
                         self.descargar()
-                    except NameError:
-                        st.error(self.resultados)
-                    print('Tiempo transcurrido: ', fin - inicio)
                 else:
                     st.error("Por favor cargue una imagen.")
 
