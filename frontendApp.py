@@ -25,7 +25,7 @@ class Frontend():
         self.response = None
 
     def download_button(self, object_to_download, download_filename,
-                        button_text, pickle_it=False):
+                        button_text,typeVal, pickle_it=False):
         if pickle_it:
             try:
                 object_to_download = pickle.dumps(object_to_download)
@@ -93,9 +93,12 @@ class Frontend():
                     color: white;
                     }}
             </style> """
-
-        dl_link = custom_css + \
-            f'<a download="{download_filename}" id="{button_id}" href="data:file/txt;base64,{b64}">{button_text}</a><br></br>'
+        if typeVal == "pdf":
+            dl_link = custom_css + \
+            f'<a download="{download_filename}" id="{button_id}" href="data:application/pdf;base64,{b64}">{button_text}</a><br></br>'
+        else:
+            dl_link = custom_css + \
+                f'<a download="{download_filename}" id="{button_id}" href="data:application/vnd.ms-excel;base64,{b64}">{button_text}</a><br></br>'
 
         return dl_link
 
@@ -137,10 +140,10 @@ class Frontend():
             with open(archivo_excel, 'rb') as file:
                 contentsExl = file.read()
             btnExl = self.download_button(
-                contentsExl, 'resultadosExcel.xlsx', 'Descargar Excel')
+                contentsExl, 'resultadosExcel.xlsx', 'Descargar Excel', "pdf")
             st.markdown(btnExl, unsafe_allow_html=True)
             btnPDF = self.download_button(
-                contentsPDF, 'resultadosPDF.pdf', 'Descargar PDF')
+                contentsPDF, 'resultadosPDF.pdf', 'Descargar PDF', "excel")
             st.markdown(btnPDF, unsafe_allow_html=True)
 
     def considerations(self):
