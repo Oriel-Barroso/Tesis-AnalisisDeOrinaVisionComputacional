@@ -140,10 +140,10 @@ class Frontend():
             with open(archivo_excel, 'rb') as file:
                 contentsExl = file.read()
             btnExl = self.download_button(
-                contentsExl, 'resultadosExcel.xlsx', 'Descargar Excel', "pdf")
+                contentsExl, 'resultadosExcel.xlsx', 'Descargar Excel', "excel")
             st.markdown(btnExl, unsafe_allow_html=True)
             btnPDF = self.download_button(
-                contentsPDF, 'resultadosPDF.pdf', 'Descargar PDF', "excel")
+                contentsPDF, 'resultadosPDF.pdf', 'Descargar PDF', "pdf")
             st.markdown(btnPDF, unsafe_allow_html=True)
 
     def considerations(self):
