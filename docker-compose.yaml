@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-testrine
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: testrine
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+      interval: 10s
+      start_period: 30s
+    networks:
+      - testrine-network
+
+  streamlit-app:
+    image: orielb97/testrine:v1.0.0
+    container_name: streamlit-testrine
+    ports:
+      - "8501:8501"
+    environment:
+      # Variables que debe usar tu aplicación
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=1234
+      - MYSQL_DB=testrine
+      # También mantener las originales por compatibilidad
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=1234
+      - DB_NAME=testrine
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - testrine-network
+
+volumes:
+  mysql_data:
+
+networks:
+  testrine-network:
+    driver: bridge

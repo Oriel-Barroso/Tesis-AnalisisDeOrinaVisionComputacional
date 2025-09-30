@@ -1,4 +1,6 @@
 import time
+import mysql
+import pandas as pd
 import streamlit as st
 import os
 import base64
@@ -8,7 +10,11 @@ import json
 import pickle
 import uuid
 import re
-import datetime
+from datetime import datetime, time
+from mysql.connector import Error
+from backend.excelConverter import CreateExcel
+from backend.mysql.src.services.user_service import UserService
+from backend.pdfConverter import PdfConverter
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 imgEjemplo = os.path.join(current_dir, 'imgEjemplo')
@@ -23,6 +29,56 @@ class Frontend():
         self.resultadosOK = ""
         self.resultadosERROR = ""
         self.response = None
+        self.db_conn = None
+        self.user_service = None
+        self._init_db()
+
+    def _init_db(self):
+        try:
+            self.db_conn = mysql.connector.connect(
+                host=os.getenv("MYSQL_HOST", "localhost"),
+                user=os.getenv("MYSQL_USER", "root"),
+                password=os.getenv("MYSQL_PASSWORD", "1234"),
+                database=os.getenv("MYSQL_DB", "testrine")
+            )
+            self._ensure_users_table()
+            self.user_service = UserService(self.db_conn)
+        except Error as e:
+            st.warning(f"No se pudo conectar a MySQL: {e}")
+    
+    def _ensure_users_table(self):
+        try:
+            cursor = self.db_conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    dni VARCHAR(64) NOT NULL UNIQUE
+                )
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS resultados_test (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    dni VARCHAR(64) NOT NULL,
+                    `Sangre` VARCHAR(50),
+                    `Bilirruina` VARCHAR(50),
+                    `Urobilinogeno` VARCHAR(50),
+                    `Cuerpos cetonicos` VARCHAR(50),
+                    `Glucosa` VARCHAR(50),
+                    `Proteina` VARCHAR(50),
+                    `Nitrito` VARCHAR(50),
+                    `Leucocitos` VARCHAR(50),
+                    `pH` VARCHAR(50),
+                    `Densidad relativa` VARCHAR(50),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (dni) REFERENCES users(dni)
+                      ON DELETE CASCADE ON UPDATE CASCADE
+                )
+            """)
+            self.db_conn.commit()
+        except Error as e:
+            st.error(f"Error creando tabla users: {e}")
+        finally:
+            cursor.close()
 
     def download_button(self, object_to_download, download_filename,
                         button_text,typeVal, pickle_it=False):
@@ -129,7 +185,7 @@ class Frontend():
             textERROR = str(self.response['imagesError'])
             self.resultadosERROR = f"Las imagenes: {textERROR[1:textERROR.index(']')]} no se han procesado correctamente"
 
-    def descargar(self):
+    def descargar(self, data_file):
         archivo_pdf = 'resultados.pdf'
         archivo_excel = 'resultadosExcel.xlsx'
         if not os.path.isfile(archivo_pdf):
@@ -139,11 +195,17 @@ class Frontend():
                 contentsPDF = file.read()
             with open(archivo_excel, 'rb') as file:
                 contentsExl = file.read()
+            for data in data_file:
+                name_file = data.name
+                name_file = name_file.replace('.jpg', '')
+                name_file = name_file.replace('.jpeg', '')
+                name_file = name_file.replace('.png', '')
+            actual_time = datetime.now()
             btnExl = self.download_button(
-                contentsExl, 'resultadosExcel.xlsx', 'Descargar Excel', "excel")
+                contentsExl, f'testrine_results_{name_file}_{actual_time}.xlsx', 'Descargar Excel', "excel")
             st.markdown(btnExl, unsafe_allow_html=True)
             btnPDF = self.download_button(
-                contentsPDF, 'resultadosPDF.pdf', 'Descargar PDF', "pdf")
+                contentsPDF, f'testrine_results_{name_file}_{actual_time}.pdf', 'Descargar PDF', "pdf")
             st.markdown(btnPDF, unsafe_allow_html=True)
 
     def considerations(self):
@@ -184,26 +246,177 @@ class Frontend():
         unsafe_allow_html=True
         )
 
+    def regenerate_pdf(self, dni):
+        if not self.user_service:
+            st.error("Servicio de usuarios no disponible.")
+            return
+        rows = self.user_service.get_test_results_by_dni(dni)
+        if not rows:
+            st.info("Sin resultados para ese DNI.")
+            return
+        pdf_data = {}
+        for row in rows:
+            lista = [
+                f"La sangre tiene un valor: {row['Sangre']}",
+                f"La bilirruina tiene un valor: {row['Bilirruina']}",
+                f"El urobilinogeno tiene un valor: {row['Urobilinogeno']}",
+                f"Los cuerpos cetonicos tienen un valor: {row['Cuerpos cetonicos']}",
+                f"La glucosa tiene un valor: {row['Glucosa']}",
+                f"La proteina tiene un valor: {row['Proteina']}",
+                f"El nitrito tiene un valor: {row['Nitrito']}",
+                f"Los leucocitos tienen un valor: {row['Leucocitos']}",
+                f"El pH tiene un valor de: {row['pH']}",
+                f"La densidad relativa tiene un valor de: {row['Densidad relativa']}",
+            ]
+            pdf_data[f"resultado_{dni}.jpeg"] = lista
+        try:
+            PdfConverter(pdf_data).createPDF()  
+            pdf_path = "resultados.pdf"
+            if os.path.exists(pdf_path):
+                with open(pdf_path, "rb") as f:
+                    st.download_button("Descargar PDF regenerado", f,
+                                       file_name=f"resultados_{dni}.pdf",
+                                       mime="application/pdf")
+                st.success("PDF regenerado.")
+            else:
+                st.error("No se encontró el PDF generado.")
+        except Exception as e:
+            st.error(f"Error al regenerar PDF: {e}")
+
+    def regenerate_excel(self, dni):
+        if not self.user_service:
+            st.error("Servicio de usuarios no disponible.")
+            return
+        rows = self.user_service.get_test_results_by_dni(dni)
+        if not rows:
+            st.info("Sin resultados para ese DNI.")
+            return
+        excel_data = {}
+        for row in rows:
+            excel_data[f"resultado_{dni}.jpeg"] = {
+                'Sangre': row['Sangre'],
+                'Bilirruina': row['Bilirruina'],
+                'Urobilinogeno': row['Urobilinogeno'],
+                'Cuerpos cetonicos': row['Cuerpos cetonicos'],
+                'Glucosa': row['Glucosa'],
+                'Proteina': row['Proteina'],
+                'Nitrito': row['Nitrito'],
+                'Leucocitos': row['Leucocitos'],
+                'pH': row['pH'],
+                'Densidad relativa': row['Densidad relativa'],
+            }
+        try:
+            CreateExcel(excel_data).createExl()  # genera resultadosExcel.xlsx
+            excel_path = "resultadosExcel.xlsx"
+            if os.path.exists(excel_path):
+                with open(excel_path, "rb") as f:
+                    st.download_button("Descargar Excel regenerado", f,
+                                       file_name=f"resultados_{dni}.xlsx",
+                                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                st.success("Excel regenerado.")
+            else:
+                st.error("No se encontró el Excel generado.")
+        except Exception as e:
+            st.error(f"Error al regenerar Excel: {e}")
+
     def main(self):
         st.set_page_config(page_title="Testrine - Análisis de orina")
         self.add_bg_from_local('imgBack.png')
         st.title("Testrine - Análisis de orina")
         self.considerations()
+        st.markdown("---")
+        st.subheader("Regeneración de reportes")
+        dni_reportes = st.text_input("DNI para regenerar PDF/Excel", key="dni_reportes")
+        col_r1, col_r2 = st.columns(2)
+        if col_r1.button("Regenerar PDF"):
+            if dni_reportes.strip():
+                self.regenerate_pdf(dni_reportes.strip())
+            else:
+                st.error("Ingrese un DNI.")
+        if col_r2.button("Regenerar Excel"):
+            if dni_reportes.strip():
+                self.regenerate_excel(dni_reportes.strip())
+            else:
+                st.error("Ingrese un DNI.")
+        st.markdown("---")
+        st.subheader("Gestión de Usuarios")
+        dni_input = st.text_input("Ingresar DNI (string)")
+        colA, colB = st.columns([1,1])
+        with colA:
+            if st.button("Agregar Usuario"):
+                if not self.user_service:
+                    st.error("Servicio no disponible.")
+                elif not dni_input.strip():
+                    st.error("El DNI no puede estar vacío.")
+                else:
+                    try:
+                        nuevo_id = self.user_service.add_user(dni_input.replace('.', '').strip())
+                        st.success(f"Usuario agregado id {nuevo_id}")
+                    except Error as e:
+                        if "Duplicate" in str(e):
+                            st.error("El DNI ya existe.")
+                        else:
+                            st.error(f"Error: {e}")
+        with colB:
+            ver_pacientes = st.button("Ver Pacientes")
+
+        if ver_pacientes and self.user_service:
+            try:
+                users = self.user_service.get_all_users()
+                if users:
+                    st.dataframe(pd.DataFrame(users), use_container_width=True)
+                else:
+                    st.info("Sin usuarios.")
+            except Error as e:
+                st.error(f"Error: {e}")
+        elif ver_pacientes and not self.user_service:
+            st.error("Servicio no disponible.")
+
+        
+        st.markdown("---")
+        st.subheader("Análisis de imágenes")
+        dni_seleccionado = None
+        if self.user_service:
+            try:
+                lista_users = self.user_service.get_all_users()
+                dnis = [u['dni'] for u in lista_users] if lista_users else []
+                if dnis:
+                    dni_seleccionado = st.selectbox("Seleccionar DNI para asociar resultados", dnis)
+                else:
+                    st.info("Primero cargue un usuario para asociar resultados.")
+            except Error as e:
+                st.error(f"Error obteniendo usuarios: {e}")
         uploaded_file = st.file_uploader(
             "Buscar Imagen", accept_multiple_files=True, type=["jpg", "jpeg", "png"])
-        if st.button("Analizar Imagen"):
+        if st.button("Analizar Imagen") and dni_seleccionado is not None:
             with st.spinner():
                 if uploaded_file != []:
                     self.analizar_imagen(uploaded_file)
                     self.checkResponse()
-                    if self.resultadosERROR != "":
+                    if self.resultadosERROR:
                         st.error(self.resultadosERROR)
-                    if self.resultadosOK != "":
-                        st.success(
-                        f'{self.resultadosOK}. Puedes ver los resultados en el pdf o en excel.')
-                        self.descargar()
+                    if self.resultadosOK:
+                        st.success(f'{self.resultadosOK}. Puedes ver los resultados en PDF o Excel.')
+                        # Insertar resultados en DB
+                        if dni_seleccionado and 'resultExcel' in self.response:
+                            inserciones = 0
+                            for _, res_dict in self.response['resultExcel'].items():
+                                try:
+                                    self.user_service.add_test_results(dni_seleccionado, res_dict)
+                                    inserciones += 1
+                                except Error as e:
+                                    st.error(f"Error guardando resultado: {e}")
+                            if inserciones:
+                                st.success(f"{inserciones} resultado(s) guardado(s) en la base.")
+                        elif not dni_seleccionado:
+                            st.warning("No se guardaron resultados en DB: no se seleccionó DNI.")
+                        self.descargar(uploaded_file)
                 else:
                     st.error("Por favor cargue una imagen.")
+        else:
+            if dni_seleccionado is None:
+                st.warning("Seleccione un DNI para asociar resultados.")
+
 
 
 if __name__ == '__main__':

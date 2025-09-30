@@ -56,9 +56,9 @@ class DetectCrop():
 
     def detect(self):
         #self.main()
-        print(self.weights, 'PESOSSSSS')
-        print(self.source, 'PAAAAAAATH')
-        print(self.image, 'IMAGEEEEEEEEEN')
+        # print(self.weights, 'PESOSSSSS')
+        # print(self.source, 'PAAAAAAATH')
+        # print(self.image, 'IMAGEEEEEEEEEN')
         imgsz, trace = self.img_size, not self.no_trace
         save_txt = False
         

@@ -6,14 +6,31 @@ from pdfConverter import PdfConverter
 import datetime
 from excelConverter import CreateExcel
 
+# Configurar rutas correctamente
 current_dir = os.path.dirname(os.path.abspath(__file__))
 yolo_dir = os.path.join(current_dir, '..', 'yolo')
 carpeta_raiz_dir = os.path.dirname(current_dir)
-sys.path.append(yolo_dir)
-sys.path.append(carpeta_raiz_dir)
 
-import detect_and_crop
+# Añadir al path de Python
+sys.path.insert(0, carpeta_raiz_dir)
+sys.path.insert(0, yolo_dir)
 
+# Debug: verificar que el archivo existe
+detect_and_crop_path = os.path.join(yolo_dir, 'detect_and_crop.py')
+print(f"Buscando detect_and_crop en: {detect_and_crop_path}")
+print(f"Archivo existe: {os.path.exists(detect_and_crop_path)}")
+
+try:
+    from detect_and_crop import DetectCrop
+    print("Import exitoso!")
+except ImportError as e:
+    print(f"Error de importación: {e}")
+    # Fallback: importar dinámicamente
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("detect_and_crop", detect_and_crop_path)
+    detect_and_crop_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(detect_and_crop_module)
+    DetectCrop = detect_and_crop_module.DetectCrop
 
 def process_image(data):
     hora_actual = datetime.datetime.now()
@@ -25,7 +42,7 @@ def process_image(data):
     for nombreImagen, datosImagen in valuesDict.items():
         with open(source + nombreImagen, 'wb') as archivo:
             archivo.write(datosImagen)
-    detc = detect_and_crop.DetectCrop(weights=yolo_dir+'/best.pt', source=source, image=current_dir+'/crop/')
+    detc = DetectCrop(weights=yolo_dir+'/best.pt', source=source, image=current_dir+'/crop/')
     detc.detect()
     resultDifference = {}
     resultExcel = {}
@@ -48,7 +65,7 @@ def process_image(data):
     for nombreImagen in valuesDict.keys():
         print(nombreImagen)
         deleteDirs(current_dir+'/crop/'+nombreImagen[:nombreImagen.index('.')])
-    return {'imagesOK': resultOK, 'imagesError': resultError}
+    return {'imagesOK': resultOK, 'imagesError': resultError, "resultExcel": resultExcel, "resultPDF": resultDifference}
 
 
 def checkDifferenceColors(path):

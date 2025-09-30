@@ -1,0 +1,31 @@
+# VCS / SO
+.git
+.gitignore
+**/__pycache__/
+**/*.pyc
+.DS_Store
+
+# Entornos y caches
+.env
+.venv
+venv
+env
+*.egg-info
+pip-wheel-metadata
+.cache
+
+# Artefactos
+dist
+build
+out
+logs
+resultadosExcel.xlsx
+resultados.pdf
+
+# Datos pesados / salidas
+data
+datasets
+dataset
+runs
+backend/resultadosExcel.xlsx
+backend/resultados.pdf
